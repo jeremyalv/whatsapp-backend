@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import passportLocalMongoose from "passport-local-mongoose";
 
 const UserSchema = mongoose.Schema({
   email: String,
@@ -35,6 +36,9 @@ UserSchema.pre('save', function(next) {
     next();
   }
 });
+
+// Export model
+UserSchema.plugin(passportLocalMongoose);
 
 const User = mongoose.model("User", UserSchema);
 

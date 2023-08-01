@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { db_username, db_password, db_cluster, db_name, server_port } from "../config/db.js";
 
 
-const connectDB = () => {
+const connect_db = () => {
   mongoose
     .connect(`mongodb+srv://${db_username}:${db_password}@${db_cluster}.mongodb.net/${db_name}?retryWrites=true&w=majority`)
   .then(() => {
@@ -15,4 +15,4 @@ const connectDB = () => {
   })
 }
 
-export default connectDB;
+export default connect_db;

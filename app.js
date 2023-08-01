@@ -3,7 +3,7 @@ import express from "express";
 import http from "node:http";
 import { Server } from "socket.io";
 import mongoose from "mongoose";
-
+import User from "./models/User.js";
 
 import cors from "cors";
 import { db_username, db_password, db_cluster, db_name, server_port } from "./config/db.js";
@@ -15,7 +15,7 @@ const server = http.createServer(app);
 
 // Connect to MongoDB Database
 mongoose
-    .connect(`mongodb+srv://${db_username}:${db_password}@${db_cluster}.mongodb.net/${db_name}?retryWrites=true&w=majority`)
+  .connect(`mongodb+srv://${db_username}:${db_password}@${db_cluster}.mongodb.net/${db_name}?retryWrites=true&w=majority`)
   .then(() => {
     console.log("Connected to MongoDB Database")
   })
@@ -23,6 +23,30 @@ mongoose
     console.log("Error:", err);
     process.exit(1);
   })
+
+// Seed DB
+await User.deleteMany({});
+
+// Create users
+await User.create({
+  email: "jere@email.com",
+  username: "jere",
+  first_name: "Jere",
+  last_name: "Andreson",  
+  avatar_url: "",
+  token: "",
+  password: "password",
+});
+
+await User.create({
+  email: "jameson@email.com",
+  username: "jameson",
+  first_name: "Jameson",
+  last_name: "Andrews",  
+  avatar_url: "",
+  token: "",
+  password: "password",
+});
 
 // Middlewares
 app.use(cors());
@@ -46,6 +70,14 @@ io.on("connection", (socket) => {
 
   // When a user joins a room
   socket.on("join_room", (roomData) => {
+    // Join the user to the room
+    socket.join(roomData._id);
+
+    // Emit event to all other users in the room
+    // TODO pass in current user as argument
+    socket.to(roomData._id).emit("user_joined_room", {});
+
+    // Notify console regarding the event
     console.log(`User ${socket.id} joined room ${roomData._id}`);
   });
 
