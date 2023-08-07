@@ -75,18 +75,31 @@ io.on("connection", (socket) => {
 
     // Emit event to all other users in the room
     // TODO pass in current user as argument
-    socket.to(roomData._id).emit("user_joined_room", {});
+    socket.to(roomData._id).emit("user_joined_room", socket, roomData);
 
     // Notify console regarding the event
     console.log(`User ${socket.id} joined room ${roomData._id}`);
   });
 
+  // Sends notifications when a user joins a room
+  socket.on("user_joined_room", (socket, roomData) => {
+    console.log(`Hey! The user ${socket.id} has joined your room (${roomData._id})`);
+  });
+
   // When a user sends a message
   socket.on("send_message", ({ room, message }) => {
     console.log(`User ${socket.id} sent message to room ${room.name}: "${message}"`);
+
+    socket.to(room._id).emit("receive_message", message);
   });
+
+
+  // When the room members receives a message
+  socket.on("receive_message", (message) => {
+    console.log("receive_message: ", message);
+  })
   
-  // When a user leaves a room
+  // When a user is disconnected from a room
   socket.on("disconnect", () => {
     console.log(`User ${socket.id} disconnected`);
   });
