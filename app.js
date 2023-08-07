@@ -82,8 +82,8 @@ io.on("connection", (socket) => {
   });
 
   // When a user sends a message
-  socket.on("send_message", (data) => {
-    console.log(`User ${socket.id} sent message to room ${data.room}`);
+  socket.on("send_message", ({ room, message }) => {
+    console.log(`User ${socket.id} sent message to room ${room.name}: "${message}"`);
   });
   
   // When a user leaves a room
