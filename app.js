@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 
 import User from "./models/User.js";
 import Room from "./models/Room.js";
+import Message from "./models/Message.js";
 
 import cors from "cors";
 import { db_username, db_password, db_cluster, db_name, server_port } from "./config/db.js";
@@ -16,6 +17,7 @@ import {
 } from "./actions/socketio.js";
 
 import RoomRouter from "./routes/RoomRoute.js";
+import bodyParser from "body-parser";
 
 // Setup Express server
 const app = express();
@@ -65,9 +67,30 @@ mongoose
 //     new mongoose.Types.ObjectId('64d734dfbf25a464aa5010fe')
 //   ]
 // });
+// await Message.deleteMany({});
+
+// await Message.create({
+//   content: "Hello World",
+//   room: new mongoose.Types.ObjectId("64d7356a565cb5dc4fa42a22"),
+//   user: new mongoose.Types.ObjectId("64d734debf25a464aa5010fc"),
+// });
+
+// await Message.create({
+//   content: "This is The Avengers speaking.",
+//   room: new mongoose.Types.ObjectId("64d7356a565cb5dc4fa42a22"),
+//   user: new mongoose.Types.ObjectId("64d734dfbf25a464aa5010fe"),
+// });
+
+// await Message.create({
+//   content: "Is anyone bringing pizza?",
+//   room: new mongoose.Types.ObjectId("64d7356a565cb5dc4fa42a22"),
+//   user: new mongoose.Types.ObjectId("64d734dfbf25a464aa5010fe"),
+// });
 
 // Middlewares
 app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Express API Routing
 app.use("/api/room", RoomRouter);

@@ -2,12 +2,12 @@ import mongoose from "mongoose";
 import Room from "../models/Room.js";
 import Message from "../models/Message.js";
 
-export const ADD_MESSAGE = async ({ content, room, user }) => {
+export const ADD_MESSAGE = async (content, roomId, userId) => {
   // Create the new message
   const newMessage = await new Message({
     content: content,
-    room: room._id,
-    user: user ? user._id : null
+    room: roomId,
+    user: userId
   });
 
   // Save the message to db
