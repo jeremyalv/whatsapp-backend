@@ -19,3 +19,12 @@ export const ADD_MESSAGE = async ({ content, room, user }) => {
     select: "first_name last_name avatar_url"
   });
 };
+
+export const GET_ROOM_MESSAGES = async (room) => {
+  return await Message.find({ room: room._id }).populate("user", [
+    "username",
+    "first_name",
+    "last_name",
+    "avatar_url"
+  ]);
+}
