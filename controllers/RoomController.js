@@ -13,6 +13,11 @@ const getRoomById = async (roomId) => {
 export const getRoomMessages = async (req, res, next) => {
   // Use params.id, NOT params._id!
   const room = await getRoomById(req.params.id);
+  
+  if (!room) {
+    res.status(404).send("Room does not exist!");
+  }
+  
   const messages = await GET_ROOM_MESSAGES(room);
 
   if (!messages) {
@@ -21,7 +26,7 @@ export const getRoomMessages = async (req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    message: "Messages received sucecssfully",
+    message: "Room messages fetched sucecssfully",
     room: room,
     room_messages: messages
   });

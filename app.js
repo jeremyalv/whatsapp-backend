@@ -34,6 +34,78 @@ mongoose
     process.exit(1);
   })
 
+// DEV TESTING NEEDS PLACEHOLDER
+
+// Middlewares
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Express API Routing
+app.use("/api/room", RoomRouter);
+
+
+// Create Socket.IO Server
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+  }
+});
+
+// Socket.IO events
+io.on("connection", (socket) => {
+  // When connected, send welcome message
+  console.log(`User ${socket.id} connected`);
+
+  socket.on("hello", (data) => {
+    console.log("Hello from server to client.");
+  });
+
+  // When a user joins a room
+  socket.on("join_room", (roomData) => {
+    // Join the user to the room
+    socket.join(roomData._id);
+
+    // Emit event to all other users in the room
+    // TODO pass in current user as argument
+    socket.to(roomData._id).emit("user_joined_room", socket.id, roomData);
+
+    // Notify console regarding the event
+    console.log(`User ${socket.id} joined room ${roomData._id}`);
+  });
+
+  // Sends notifications when a user joins a room
+  socket.on("user_joined_room", (socketId, roomData) => {
+    console.log(`Hey! The user ${socketId} has joined your room (${roomData._id})`);
+  });
+
+  // When a user sends a message
+  socket.on("send_message", ({ room, message }) => {
+    console.log(`User ${socket.id} sent message to room ${room.name}: "${message}"`);
+
+    // Emit data back to client for display
+    io.to(room._id).emit("receive_message", message);
+  });
+
+
+  // When the room members receives a message
+  socket.on("receive_message", (message) => {
+    console.log("receive_message: ", message);
+  })
+  
+  // When a user is disconnected from a room
+  socket.on("disconnect", () => {
+    console.log(`User ${socket.id} disconnected`);
+  });
+})
+
+server.listen(process.env.PORT, () => {
+  console.log(`Server is running on port ${process.env.PORT}`);
+});
+
+
+// DEV TESTING NEEDS
 // Clear DB
 // #await User.deleteMany({}); Commented for testing reasons
 // #await Room.deleteMany({});
@@ -86,71 +158,3 @@ mongoose
 //   room: new mongoose.Types.ObjectId("64d7356a565cb5dc4fa42a22"),
 //   user: new mongoose.Types.ObjectId("64d734dfbf25a464aa5010fe"),
 // });
-
-// Middlewares
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Express API Routing
-app.use("/api/room", RoomRouter);
-
-
-// Create Socket.IO Server
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"],
-  }
-});
-
-// Socket.IO events
-io.on("connection", (socket) => {
-  // When connected, send welcome message
-  console.log(`User ${socket.id} connected`);
-
-  socket.on("hello", (data) => {
-    console.log("Hello World");
-  });
-
-  // When a user joins a room
-  socket.on("join_room", (roomData) => {
-    // Join the user to the room
-    socket.join(roomData._id);
-
-    // Emit event to all other users in the room
-    // TODO pass in current user as argument
-    socket.to(roomData._id).emit("user_joined_room", socket.id, roomData);
-
-    // Notify console regarding the event
-    console.log(`User ${socket.id} joined room ${roomData._id}`);
-  });
-
-  // Sends notifications when a user joins a room
-  socket.on("user_joined_room", (socketId, roomData) => {
-    console.log(`Hey! The user ${socketId} has joined your room (${roomData._id})`);
-  });
-
-  // When a user sends a message
-  socket.on("send_message", ({ room, message }) => {
-    console.log(`User ${socket.id} sent message to room ${room.name}: "${message}"`);
-
-    // Emit data back to client for display
-    io.to(room._id).emit("receive_message", message);
-  });
-
-
-  // When the room members receives a message
-  socket.on("receive_message", (message) => {
-    console.log("receive_message: ", message);
-  })
-  
-  // When a user is disconnected from a room
-  socket.on("disconnect", () => {
-    console.log(`User ${socket.id} disconnected`);
-  });
-})
-
-server.listen(process.env.PORT, () => {
-  console.log(`Server is running on port ${process.env.PORT}`);
-});
