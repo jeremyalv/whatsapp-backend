@@ -11,6 +11,7 @@ const RoomSchema = mongoose.Schema({
     minlength: ['3', 'Room name should be at least 3 characters long'],
     maxlength: ['20', 'Room name should be at most 20 characters long'],
   },
+  last_message: String,
   users: [
     {
       type: mongoose.Schema.Types.ObjectId,

@@ -1,29 +1,33 @@
 import {} from "dotenv/config";
 import express from "express";
 import http from "node:http";
+import cors from "cors";
 import { Server } from "socket.io";
 import mongoose from "mongoose";
+import passport from "passport";
+
+import bodyParser from "body-parser";
+import cookieSession from "cookie-session";
+import connectEnsureLogin from "connect-ensure-login";
 
 import User from "./models/User.js";
 import Room from "./models/Room.js";
 import Message from "./models/Message.js";
-
-import cors from "cors";
-import { db_username, db_password, db_cluster, db_name, server_port } from "./config/db.js";
 
 import {
   ADD_MESSAGE,
   GET_ROOM_MESSAGES
 } from "./actions/socketio.js";
 
+import { db_username, db_password, db_cluster, db_name, server_port } from "./config/db.js";
+
 import RoomRouter from "./routes/RoomRoute.js";
-import bodyParser from "body-parser";
 
 // Setup Express server
 const app = express();
 const server = http.createServer(app);
 
-// Connect to MongoDB Database
+// Mongoose setup
 mongoose
   .connect(`mongodb+srv://${db_username}:${db_password}@${db_cluster}.mongodb.net/${db_name}?retryWrites=true&w=majority`)
   .then(() => {
@@ -39,11 +43,66 @@ mongoose
 // Middlewares
 app.use(cors());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ 
+  extended: true 
+}));
+app.use(cookieSession({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Configure passport.js local auth
+passport.use(User.createStrategy());
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 // Express API Routing
-app.use("/api/room", RoomRouter);
+// Source: https://www.sitepoint.com/local-authentication-using-passport-node-js/
+app.post("/login", (req, res, next) => {
+  console.log("INFO: login endpoint hit")
+  passport.authenticate("local", 
+    (err, user, info) => {
+      if (err) {
+        return next(err);
+      }
 
+      if (!user) {
+        return res.redirect("/login");
+      }
+
+      req.logIn(user, function(err) {
+        if (err) {
+          return next(err);
+        }
+
+        console.log("INFO: Authentication successful");
+        console.log("INFO: user_info: ", info);
+        return res.statusCode(200).send("Log in successful.")
+      });
+    })(req, res, next);
+});
+
+app.get("/logout", (req, res) => {
+  req.logOut();
+})
+
+// Protected endpoints
+app.get("/", 
+  connectEnsureLogin.ensureLoggedIn(), 
+  (req, res) => res.redirect("/")
+);
+
+app.get("/user", 
+  connectEnsureLogin.ensureLoggedIn(),
+  (req, res) => res.send({ user: req.user })
+);
+
+
+app.use("/api/room", RoomRouter);
 
 // Create Socket.IO Server
 const io = new Server(server, {
