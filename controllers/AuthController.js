@@ -7,16 +7,45 @@ import Message from "../models/Message.js";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
-export const register = (req, res, next) => {
+/* When user have filled in register form */
+/* TODO add verify email before signup */
+export const register = async (req, res, next) => {
+  const { email, password } = req.body;
   
+  try {
+    const newUser = await User.create({
+      email: email,
+      username: email,
+      password: password,
+
+      first_name: "",
+      last_name: "",
+
+      // Template Avatar
+      avatar_url: "https://ui-avatars.com/api/?name=John+Doe&background=0D8ABC&color=fff",
+      token: "",
+    });
+
+    // Send success message
+    res.status(201).json({
+      success: true,
+      message: "User created",
+      data: {
+        userId: newUser._id,
+        email: newUser.email,
+      }
+    });
+  } catch (error) {
+    console.error("Register: An error occurred")
+    next(error);
+  }
 };
 
 export const login = async (req, res, next) => {
-  const { email, password }= req.body;
-  let existingUser;
+  const { email, password } = req.body;
   
   try {
-    existingUser = await User.findOne({ email: email }); 
+    const existingUser = await User.findOne({ email: email }); 
 
     if (!existingUser) {
       res.status(401).send("User does not exist");
