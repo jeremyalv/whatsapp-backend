@@ -15,6 +15,8 @@ AuthRouter.post("/register", register);
 AuthRouter.post("/login", login);
 AuthRouter.post("/logout", logout);
 AuthRouter.post("/forget-password", forgetPassword);
+
+// For dev purposes only
 AuthRouter.post("/jwt", getJWT);
 AuthRouter.post("/verify", authenticateToken, (req, res) => {
   if (req.user) {

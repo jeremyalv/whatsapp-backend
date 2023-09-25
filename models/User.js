@@ -39,7 +39,7 @@ UserSchema.pre('save', function(next) {
 });
 
 // Export model
-UserSchema.plugin(passportLocalMongoose);
+// UserSchema.plugin(passportLocalMongoose);
 
 const User = mongoose.model("User", UserSchema);
 
