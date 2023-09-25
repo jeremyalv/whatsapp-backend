@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import Room from "../models/Room.js";
 import Message from "../models/Message.js";
+import User from "../models/User.js";
 
 import { GET_ROOM_MESSAGES, ADD_MESSAGE } from "../actions/socketio.js";
-import User from "../models/User.js";
 
 const getAllRooms = async () => {
   const rooms = await Room.find();

@@ -22,6 +22,7 @@ import {
 import { db_username, db_password, db_cluster, db_name, server_port } from "./config/db.js";
 
 import RoomRouter from "./routes/RoomRoute.js";
+import AuthRouter from "./routes/AuthRoute.js";
 
 // Setup Express server
 const app = express();
@@ -62,46 +63,46 @@ passport.deserializeUser(User.deserializeUser());
 
 // Express API Routing
 // Source: https://www.sitepoint.com/local-authentication-using-passport-node-js/
-app.post("/login", (req, res, next) => {
-  console.log("INFO: login endpoint hit")
-  passport.authenticate("local", 
-    (err, user, info) => {
-      if (err) {
-        return next(err);
-      }
+// app.post("/login", (req, res, next) => {
+//   console.log("INFO: login endpoint hit")
+//   passport.authenticate("local", 
+//     (err, user, info) => {
+//       if (err) {
+//         return next(err);
+//       }
 
-      if (!user) {
-        return res.redirect("/login");
-      }
+//       if (!user) {
+//         return res.redirect("/login");
+//       }
 
-      req.logIn(user, function(err) {
-        if (err) {
-          return next(err);
-        }
+//       req.logIn(user, function(err) {
+//         if (err) {
+//           return next(err);
+//         }
 
-        console.log("INFO: Authentication successful");
-        console.log("INFO: user_info: ", info);
-        return res.statusCode(200).send("Log in successful.")
-      });
-    })(req, res, next);
-});
+//         console.log("INFO: Authentication successful");
+//         console.log("INFO: user_info: ", info);
+//         return res.statusCode(200).send("Log in successful.")
+//       });
+//     })(req, res, next);
+// });
 
-app.get("/logout", (req, res) => {
-  req.logOut();
-})
+// app.get("/logout", (req, res) => {
+//   req.logOut();
+// })
 
-// Protected endpoints
-app.get("/", 
-  connectEnsureLogin.ensureLoggedIn(), 
-  (req, res) => res.redirect("/")
-);
+// // Protected endpoints
+// app.get("/", 
+//   connectEnsureLogin.ensureLoggedIn(), 
+//   (req, res) => res.redirect("/")
+// );
 
-app.get("/user", 
-  connectEnsureLogin.ensureLoggedIn(),
-  (req, res) => res.send({ user: req.user })
-);
+// app.get("/user", 
+//   connectEnsureLogin.ensureLoggedIn(),
+//   (req, res) => res.send({ user: req.user })
+// );
 
-
+app.use("/api/auth", AuthRouter);
 app.use("/api/room", RoomRouter);
 
 // Create Socket.IO Server
