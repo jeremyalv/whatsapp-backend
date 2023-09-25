@@ -7,6 +7,7 @@
   "scripts": {
     "start": "npx kill-port 3010 && nodemon app.js",
     "dev": "npx kill-port 3010 && nodemon app.js",
+    "stop": "npx kill-port 3010",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

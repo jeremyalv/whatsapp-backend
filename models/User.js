@@ -6,7 +6,11 @@ import passportLocalMongoose from "passport-local-mongoose";
 const UserSchema = mongoose.Schema({
   email: String,
   username: String,
-  password: String,
+  password: {
+    type: String,
+    required: "Password is required",
+    max: 25
+  },
 
   first_name: String,
   last_name: String,

@@ -6,6 +6,7 @@ import Room from "../models/Room.js";
 import Message from "../models/Message.js";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
+import Blacklist from "../models/Blacklist.js";
 
 /* When user have filled in register form */
 /* TODO add verify email before signup */
@@ -74,12 +75,50 @@ export const login = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Login: An error occurred")
-    return next(error);
+    next(error);
   }
 };
 
-export const logout = (req, res, next) => {
+export const logout = async (req, res, next) => {
+  /** TODO 
+   * Create optimized version using Redis
+   * https://dev.to/mr_cea/using-redis-for-token-blacklisting-in-node-js-42g7
+   */
+  
+  try {
+    const authHeader = req.headers["cookie"];
+    
+    if (!authHeader) {
+      return res.status(204);
+    }
+    
+    const cookie = authHeader.split("=")[1];
+    const accessToken = cookie.split(";")[0];
 
+    // Check if the access token is blacklisted
+    const isTokenBlacklisted = await Blacklist.findOne({ token: accessToken });
+
+    if (isTokenBlacklisted) {
+      return res.sendStatus(204);
+    }
+
+    // Otherwise, blacklist token
+    const newBlacklist = await Blacklist.create({
+      token: accessToken,
+    });
+
+    // Clear request cookie on client
+    res.setHeader('Clear-Site-Data', '"cookies", "storage"');
+
+    res.status(200).json({
+      message: "Successfully logged out",
+    });
+  } catch (error) {
+    console.error("Logout: An error occurred");
+    next(error); 
+  }
+
+  res.send(204);
 };
 
 export const forgetPassword = (req, res, next) => {
@@ -99,7 +138,7 @@ export const authenticateToken = (req, res, next) => {
     console.log(err);
 
     if (err) {
-      return res.sendStatus(403);
+      return res.status(403).send("An error occurred when verifying JWT");
     }
 
     // Attach user instance to requests

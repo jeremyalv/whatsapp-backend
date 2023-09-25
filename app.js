@@ -23,6 +23,7 @@ import { db_username, db_password, db_cluster, db_name, server_port } from "./co
 
 import RoomRouter from "./routes/RoomRoute.js";
 import AuthRouter from "./routes/AuthRoute.js";
+import Blacklist from "./models/Blacklist.js";
 
 // Setup Express server
 const app = express();
@@ -218,4 +219,8 @@ server.listen(process.env.PORT, () => {
 //   content: "Is anyone bringing pizza?",
 //   room: new mongoose.Types.ObjectId("64d7356a565cb5dc4fa42a22"),
 //   user: new mongoose.Types.ObjectId("64d734dfbf25a464aa5010fe"),
+// });
+
+// await Blacklist.create({
+//   token: "TEST"
 // });
