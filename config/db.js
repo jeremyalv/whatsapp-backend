@@ -1,3 +1,5 @@
+import {} from "dotenv/config";
+
 export const server_port = process.env.PORT;
 export const db_username = process.env.MONGODB_USERNAME;
 export const db_password = process.env.MONGODB_PASSWORD;

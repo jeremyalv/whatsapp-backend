@@ -4,13 +4,20 @@ import passport from "passport";
 import passportLocalMongoose from "passport-local-mongoose";
 
 const UserSchema = mongoose.Schema({
-  email: String,
-  username: String,
+  phone_number: {
+    type: String,
+    required: true,
+    max: 15,
+    unique: true
+  },
   password: {
     type: String,
     required: "Password is required",
     max: 25
   },
+  
+  email: String,
+  username: String,
 
   first_name: String,
   last_name: String,

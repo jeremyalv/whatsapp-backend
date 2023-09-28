@@ -11,6 +11,8 @@ import {
 
 const AuthRouter = express.Router();
 
+// TODO check for frontend
+// https://www.digitalocean.com/community/tutorials/nodejs-jwt-expressjs
 AuthRouter.post("/register", register);
 AuthRouter.post("/login", login);
 AuthRouter.post("/logout", logout);

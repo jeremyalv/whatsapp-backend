@@ -9,14 +9,13 @@ import jwt from "jsonwebtoken";
 import Blacklist from "../models/Blacklist.js";
 
 /* When user have filled in register form */
-/* TODO add verify email before signup */
+/* TODO add verify phone before signup */
 export const register = async (req, res, next) => {
-  const { email, password } = req.body;
+  const { phone_number, password } = req.body;
   
   try {
     const newUser = await User.create({
-      email: email,
-      username: email,
+      phone_number: phone_number,
       password: password,
 
       first_name: "",
@@ -33,7 +32,7 @@ export const register = async (req, res, next) => {
       message: "User created",
       data: {
         userId: newUser._id,
-        email: newUser.email,
+        phone_number: newUser.phone_number,
       }
     });
   } catch (error) {
@@ -43,13 +42,21 @@ export const register = async (req, res, next) => {
 };
 
 export const login = async (req, res, next) => {
-  const { email, password } = req.body;
+  const { phone_number, password } = req.body;
   
   try {
-    const existingUser = await User.findOne({ email: email }); 
+    if (phone_number === "") {
+      res.status(400).send("Phone number cannot be empty");
+    }
+
+    if (password === "") {
+      res.status(400).send("Password cannot be empty");
+    }
+
+    const existingUser = await User.findOne({ phone_number: phone_number }); 
 
     if (!existingUser) {
-      res.status(401).send("User does not exist");
+      res.status(404).send("User with that phone number does not exist");
     }
   
     // const passwordsMatch = await compareToHashPassword(password, existingUser.password);
@@ -62,6 +69,9 @@ export const login = async (req, res, next) => {
   
     // Create access token by user's object id
     const token = generateAccessToken(existingUser._id);
+
+    // Append token to user data
+    existingUser.token = token;
   
     // Send success response
     res.status(200).json({
@@ -69,7 +79,7 @@ export const login = async (req, res, next) => {
       message: "Login successful",
       data: {
         userId: existingUser._id,
-        email: existingUser.email,
+        phone_number: existingUser.phone_number,
         token: token,
       },
     });
@@ -89,7 +99,7 @@ export const logout = async (req, res, next) => {
     const authHeader = req.headers["cookie"];
     
     if (!authHeader) {
-      return res.status(204);
+      return res.status(401).send("You must log in before you can log out");
     }
     
     const cookie = authHeader.split("=")[1];
@@ -99,11 +109,11 @@ export const logout = async (req, res, next) => {
     const isTokenBlacklisted = await Blacklist.findOne({ token: accessToken });
 
     if (isTokenBlacklisted) {
-      return res.sendStatus(204);
+      return res.status(401).send("Token is deprecated");
     }
 
-    // Otherwise, blacklist token
-    const newBlacklist = await Blacklist.create({
+    // Otherwise, add token to Blacklist data
+    await Blacklist.create({
       token: accessToken,
     });
 
@@ -111,6 +121,7 @@ export const logout = async (req, res, next) => {
     res.setHeader('Clear-Site-Data', '"cookies", "storage"');
 
     res.status(200).json({
+      success: true,
       message: "Successfully logged out",
     });
   } catch (error) {
@@ -118,7 +129,8 @@ export const logout = async (req, res, next) => {
     next(error); 
   }
 
-  res.send(204);
+  console.log("Logout: Outside try-catch block");
+  next();
 };
 
 export const forgetPassword = (req, res, next) => {
@@ -170,9 +182,9 @@ export const getJWT = (req, res, next) => {
   }
 };
 
-const compareToHashPassword = async (inputPassword, realPassword) => {
-  return await bcryptjs.compare(inputPassword, realPassword);
-};
+// const compareToHashPassword = async (inputPassword, realPassword) => {
+//   return await bcryptjs.compare(inputPassword, realPassword);
+// };
 
 const generateAccessToken = (userId) => {
   return jwt.sign(

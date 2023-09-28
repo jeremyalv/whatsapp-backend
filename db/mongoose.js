@@ -5,7 +5,9 @@ import { db_username, db_password, db_cluster, db_name, server_port } from "../c
 
 const connect_db = () => {
   mongoose
-    .connect(`mongodb+srv://${db_username}:${db_password}@${db_cluster}.mongodb.net/${db_name}?retryWrites=true&w=majority`)
+    .connect(`mongodb+srv://${db_username}:${db_password}@${db_cluster}.mongodb.net/${db_name}?retryWrites=true&w=majority`,
+      { useNewUrlParser: true, useUnifiedTopology: true }
+    )
   .then(() => {
     console.log("Connected to MongoDB Database")
   })
