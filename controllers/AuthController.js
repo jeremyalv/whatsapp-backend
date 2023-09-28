@@ -27,7 +27,7 @@ export const register = async (req, res, next) => {
     });
 
     // Send success message
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "User created",
       data: {
@@ -46,41 +46,41 @@ export const login = async (req, res, next) => {
   
   try {
     if (phone_number === "") {
-      res.status(400).send("Phone number cannot be empty");
+      return res.status(400).send("Phone number cannot be empty");
     }
 
     if (password === "") {
-      res.status(400).send("Password cannot be empty");
+      return res.status(400).send("Password cannot be empty");
     }
 
     const existingUser = await User.findOne({ phone_number: phone_number }); 
 
-    if (!existingUser) {
-      res.status(404).send("User with that phone number does not exist");
+    if (existingUser === null) {
+      return res.status(404).send("User with that phone number does not exist");
     }
   
     // const passwordsMatch = await compareToHashPassword(password, existingUser.password);
-
     const passwordsMatch = await existingUser.isValidPassword(password);
-  
+    
     if (!passwordsMatch) {
-      res.status(401).send("Incorrect password");
+      return res.status(401).send("Incorrect password");
     }
-  
+    
     // Create access token by user's object id
     const token = generateAccessToken(existingUser._id);
-
+    
     // Append token to user data
     existingUser.token = token;
-  
+    
+    console.log("existingUser", existingUser);
     // Send success response
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Login successful",
       data: {
         userId: existingUser._id,
         phone_number: existingUser.phone_number,
-        token: token,
+        token: existingUser.token,
       },
     });
   } catch (error) {
@@ -120,7 +120,7 @@ export const logout = async (req, res, next) => {
     // Clear request cookie on client
     res.setHeader('Clear-Site-Data', '"cookies", "storage"');
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Successfully logged out",
     });
