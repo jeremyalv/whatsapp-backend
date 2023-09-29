@@ -74,7 +74,6 @@ export const addMessage = async (req, res, next) => {
     }
     
     const created_message = await ADD_MESSAGE(content, room._id, userId);
-    console.log("created_message:", created_message);
 
     // Update room's last_message field
     await Room.findOneAndUpdate(
