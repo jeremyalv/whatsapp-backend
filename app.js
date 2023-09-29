@@ -30,6 +30,7 @@ const app = express();
 const server = http.createServer(app);
 
 // Mongoose setup
+// Ensure that firewall is disabled
 mongoose
   .connect(`mongodb+srv://${db_username}:${db_password}@${db_cluster}.mongodb.net/${db_name}?retryWrites=true&w=majority`)
   .then(() => {

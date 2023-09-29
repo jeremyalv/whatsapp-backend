@@ -21,12 +21,13 @@ AuthRouter.post("/forget-password", forgetPassword);
 // For dev purposes only
 AuthRouter.post("/jwt", getJWT);
 AuthRouter.post("/verify", authenticateToken, (req, res) => {
-  if (req.user) {
-    res.status(200).send({
+  try {
+    res.status(200).json({
       user: req.user
     })
+  } catch (err) {
+    console.error("VerifyError:", err);
   }
-  res.status(200).send("req.user == null");
 });
 
 export default AuthRouter;

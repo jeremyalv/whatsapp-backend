@@ -147,8 +147,6 @@ export const authenticateToken = (req, res, next) => {
 
   console.log("Verifying JWT...");
   jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
-    console.log(err);
-
     if (err) {
       return res.status(403).send("An error occurred when verifying JWT");
     }
@@ -181,10 +179,6 @@ export const getJWT = (req, res, next) => {
     console.error(e); 
   }
 };
-
-// const compareToHashPassword = async (inputPassword, realPassword) => {
-//   return await bcryptjs.compare(inputPassword, realPassword);
-// };
 
 const generateAccessToken = (userId) => {
   return jwt.sign(
