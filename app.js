@@ -107,7 +107,7 @@ app.use(cookieSession({
 
 app.use("/api/auth", AuthRouter);
 app.use("/api/room", RoomRouter);
-app.use("/api/test", (req, res, next) => {
+app.get("/api/test", (req, res, next) => {
   res.send("Hello world! The server is up and running.")
 })
 
