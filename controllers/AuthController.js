@@ -148,11 +148,14 @@ export const authenticateToken = (req, res, next) => {
   console.log("Verifying JWT...");
   jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
     if (err) {
+      console.error("403: JWT Verification Failed.")
       return res.status(403).send("An error occurred when verifying JWT");
     }
 
     // Attach user instance to requests
     req.user = user;
+
+    console.log("JWT Verification Successful.")
 
     next();
   });
